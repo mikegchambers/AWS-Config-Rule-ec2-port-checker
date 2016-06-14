@@ -180,7 +180,7 @@ def lambda_handler(event, context):
 					"ComplianceResourceType": "AWS::EC2::Instance",
 					"ComplianceResourceId": evaluation,
 					"ComplianceType": "NON_COMPLIANT",
-					"Annotation": "Instance has non compliant groups {}".format( ','.join(evaluations[e]) ),
+					"Annotation": "Instance has non compliant groups {}".format( ','.join(evaluations[evaluation]) ),
 					"OrderingTimestamp": configuration_item["configurationItemCaptureTime"]
 				})
 			else:
