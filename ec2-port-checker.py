@@ -197,7 +197,7 @@ def lambda_handler(event, context):
 			"compliance_type": "NOT_APPLICABLE",
 			"annotation": "The rule doesn't apply to resources of type " +
 			configuration_item["resourceType"] + "."
-		}}
+		})
 	
 	print (json.dumps(outputEvaluation))
 
