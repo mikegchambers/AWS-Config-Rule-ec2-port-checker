@@ -123,7 +123,7 @@ def getViolationGroups( secGroupSet, forbiddenPorts ):
 	for secGroup in secGroupSet:
 		ec2 = boto3.resource('ec2')
 		security_group = ec2.SecurityGroup(secGroup)
-		exposed_ports = find_exposed_ports( security_group.ip_permissions ) 		
+		exposed_ports = find_exposed_ports( security_group.ip_permissions ) 
 		if find_violation( exposed_ports, forbiddenPorts):
 			violations.append(secGroup)
 
@@ -138,8 +138,10 @@ def evaluate_compliance(configuration_item, rule_parameters):
 	elif configuration_item["resourceType"] == "AWS::EC2::Instance":
 		instanceId = configuration_item["configuration"]["instanceId"]
 		groups = secGroupsForInstanceId( instanceId )
-		groupSet = set(groups)
-		scope = { "secGroupsToCheck" : groups,
+		groupSet = set()
+		for group in groups:
+			groupSet.add( group['GroupId'] )
+		scope = { "secGroupsToCheck" : groupSet,
 				  "instancesToEvaluate" : { instanceId : groupSet } }
 	else:
 		return False
