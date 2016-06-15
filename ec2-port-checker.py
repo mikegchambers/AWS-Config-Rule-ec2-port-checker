@@ -131,10 +131,15 @@ def getViolationGroups( secGroupSet, forbiddenPorts ):
 
 def evaluate_compliance(configuration_item, rule_parameters):
 	
+	violationInstances = {}
+	
 	if configuration_item["resourceType"] == "AWS::EC2::SecurityGroup":
-		triggerSecGroupId = configuration_item["configuration"]["groupId"]
-		scope = determineEvaluationScopeFromTriggerSecGroup( triggerSecGroupId )
-		
+		if ( configuration_item["configuration"] ):
+			triggerSecGroupId = configuration_item["configuration"]["groupId"]
+			scope = determineEvaluationScopeFromTriggerSecGroup( triggerSecGroupId )
+		else:
+			return False
+			
 	elif configuration_item["resourceType"] == "AWS::EC2::Instance":
 		instanceId = configuration_item["configuration"]["instanceId"]
 		groups = secGroupsForInstanceId( instanceId )
@@ -148,8 +153,6 @@ def evaluate_compliance(configuration_item, rule_parameters):
 	
 	instancesToEvaluate = scope['instancesToEvaluate']	
 	violationGroups = getViolationGroups( scope['secGroupsToCheck'], rule_parameters )
-	
-	violationInstances = {}
 
 	for instance in instancesToEvaluate:
 		violationInstances[instance] = []
@@ -196,9 +199,11 @@ def lambda_handler(event, context):
 	
 	else:
 		outputEvaluation.append ({
-			"compliance_type": "NOT_APPLICABLE",
-			"annotation": "The rule doesn't apply to resources of type " +
-			configuration_item["resourceType"] + "."
+			"ComplianceResourceType": configuration_item["resourceType"],
+			"ComplianceResourceId": configuration_item["resourceId"],
+			"ComplianceType": "NOT_APPLICABLE",
+			"Annotation": "The rule doesn't apply to resources of type {} or this resource {} has been deleted.".format( configuration_item["resourceType"], configuration_item["resourceId"] ),
+			"OrderingTimestamp": configuration_item["configurationItemCaptureTime"]
 		})
 	
 	print (json.dumps(outputEvaluation))
